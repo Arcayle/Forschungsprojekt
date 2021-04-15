@@ -6,8 +6,8 @@ let octave = ['0', '1', '2', '3', '4', '5', '6', '7'];
 let counter = 0;
 let length = 0;
 
-let Handrange_custom_range = 6;
-let Handrange_custom_mode = false;
+let Handrange_custom_range = 5;
+let Handrange_custom_mode = true;
 
 let n = 6;
 let l = 0;
@@ -59,7 +59,7 @@ for (let i = 0; i < octave.length; i++) {
 //holt aus der JSON Datei die Noten in vn_ar
 for (let i = 0; i < JSON_input.tracks[0].notes.length; i++) {
     vn_ar.push(JSON_input.tracks[0].notes[i].name);
-    
+
 }
 
 
@@ -86,18 +86,41 @@ Handpositionswechsel : 4
 
 */
 if (Handrange_custom_mode) {
-    
-    let stop_custom = 0;
+
+    let j = 0;
+    let m = 0;
+    let p = 0;
+    let h = 0;
     fingerpositions = [[], [], [], [], [], [], []];
-    
+
     for (let i = 0; i < fingerpositions.length; i++) {
-        
-        while (condition) {
+
+        while(m != Handrange_custom_range) {
             
+            fingerpositions[i][h] = notes[j % (notes.length)];
+            
+            if(notes[j % (notes.length)].substr(1) != '#'){
+                m++;                
+            }
+            
+            j++;
+            h++;
         }
         
+        if(fingerpositions[i][0] == 'E' || fingerpositions[i][0] == 'B'){
+            
+            p++;
+            
+        } else {
+
+            p = p + 2;
+        }
+        
+        h = 0;
+        m = 0;
+        j = p;
     }
-    
+
 }
 
 
@@ -107,21 +130,21 @@ if (Handrange_custom_mode) {
 
 //fügt zu den Noten der fingerpositions noch (alle) Oktaven hinzu 
 while (counter <= fingerpositions.length) {
-    
+
     length = fingerpositions[counter].length;
-    
+
     for (let i = 0; i < octave.length; i++) {
-        
+
         for (let j = 0; j < length; j++) {
-            
+
             fingerpositions[counter].push(fingerpositions[counter][j].concat(octave[i]));
-            
+
         }
-        
-        
+
+
     }
     counter++;
-    
+
 }
 
 
@@ -131,14 +154,14 @@ while (counter <= fingerpositions.length) {
 //Falls in Reichweite Hand position nicht weschseln
 //Falls nicht mehr in Reichweite eine Bestimmte Handposition annehmen
 while (vn_ar.length - l > 0) {
-    
+
     //Handposition alg.
-    
+
     // verteilt ein Scoring basierend auf gleichheit der Handpositionen und den nächsten n-noten
     for (i = 0; i < fingerpositions.length; i++) {
-        
+
         for (let j = l; j < stop; j++) {
-            
+
             // für die letzten noten (restlichen noten die weniger als n sind)  
             if ((l + n) - 1 > vn_ar.length) {
                 stop = vn_ar.length;
