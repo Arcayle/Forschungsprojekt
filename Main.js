@@ -233,12 +233,36 @@ while (vn_ar.length - l > 0) {
                     notenposition_in_positions=i;
                 }
             }
-            let mögliche_nachbar_noten_links= (verwendete fingerpositions)[i-1];
-            let mögliche_nachbar_noten_rechts= (verwendete fingerpositions)[i+1];
             //Da es auch sein kann, dass man den anderen finger zum spielen einer #note braucht wird es als schwaches nachbar scoring verwendet falls in mögliche_nachbar_noten_links und mögliche_nachbar_noten_rechts
            // nichts vorkommt.
-            let mögliche_nachbar_noten_links_schwach= (verwendete fingerpositions)[i-2];
-            let mögliche_nachbar_noten_rechts_schwach= (verwendete fingerpositions)[i+2];
+            if(i-1<0){
+                i+=7;
+                let mögliche_nachbar_noten_links= (verwendete fingerpositions)[i-1];}
+            else{
+                let mögliche_nachbar_noten_links= (verwendete fingerpositions)[i-1];}
+            }
+            if(i-2<0){
+                i+=7;
+                let mögliche_nachbar_noten_links_schwach= (verwendete fingerpositions)[i-2];}
+            else{
+                let mögliche_nachbar_noten_links_schwach= (verwendete fingerpositions)[i-2];}
+            }
+            if(i+1>6){
+                i-=7;
+                let mögliche_nachbar_noten_rechts= (verwendete fingerpositions)[i+1];}
+            else{
+                let mögliche_nachbar_noten_rechts= (verwendete fingerpositions)[i+1];}
+            }
+            if(i+2>6){
+                i+=7;
+                let mögliche_nachbar_noten_rechts_schwach= (verwendete fingerpositions)[i+2];}
+            else{
+                let mögliche_nachbar_noten_rechts_schwach= (verwendete fingerpositions)[i+2];}
+            }
+    
+            
+      
+            
             //überprüfen ob in den nächsten noten eine der nachbar möglichkeiten vorkommt.
             let richtiger_finger=false;//(boolean variable, links = false)
             let richtiger_finger_wurde_gesetzt;(//boolean)
