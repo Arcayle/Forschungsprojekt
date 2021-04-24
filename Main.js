@@ -223,7 +223,55 @@ while (vn_ar.length - l > 0) {
     Todo: 
         Problem : nächster Finger wird mit kleinster Fingerdistanz zur Note gewählt, aber
                   welcher wird gewählt bei gleicher distanz?  
-        Lösung:
+        Lösung: Man betrachtet die nächsten x (hier 5) noten und ob und welcher finger als nächstes nochmal benötigt wird.
+                Dann verwendet man zum spielen dieser note den anderen.
+        let notenposition_in_positions=0;
+        let zu_überprüfende_note= scoring_notes_sequence[(position der zu überprüfenden note)];
+            //man muss benachbarte noten in fingerpositions finden.
+            for (let i = 0; i < 6; i++) {
+                if((verwendete fingerpositions)[i]==zu_überprüfende_note){
+                    notenposition_in_positions=i;
+                }
+            }
+            let mögliche_nachbar_noten_links= (verwendete fingerpositions)[i-1];
+            let mögliche_nachbar_noten_rechts= (verwendete fingerpositions)[i+1];
+            //Da es auch sein kann, dass man den anderen finger zum spielen einer #note braucht wird es als schwaches nachbar scoring verwendet falls in mögliche_nachbar_noten_links und mögliche_nachbar_noten_rechts
+           // nichts vorkommt.
+            let mögliche_nachbar_noten_links_schwach= (verwendete fingerpositions)[i-2];
+            let mögliche_nachbar_noten_rechts_schwach= (verwendete fingerpositions)[i+2];
+            //überprüfen ob in den nächsten noten eine der nachbar möglichkeiten vorkommt.
+            let richtiger_finger=false;//(boolean variable, links = false)
+            let richtiger_finger_wurde_gesetzt;(//boolean)
+            let schwacher_finger_falls_kein_starker_gefunden=false;//(boolean variable, links = false)
+        for (let v = 5; v >= 1; v--) //läuft rückwärts da nächste note am wichtigsten, man überschreibt immer falls wichtigere position.
+        {
+            
+            if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_links){
+                //richtiger finger ist der rechtere
+               richtiger_finger=true;
+               richtiger_finger_wurde_gesetzt=true;
+            }
+            if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_rechts){
+                //richtiger finger ist der linkere
+                richtiger_finger=false;
+                richtiger_finger_wurde_gesetzt=true;
+            }
+            if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_links_schwach){
+                schwacher_finger_falls_kein_starker_gefunden=true;
+            }
+            if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_rechts_schwach){
+                schwacher_finger_falls_kein_starker_gefunden=false;
+            }
+
+        }
+        if(richtiger_finger_wurde_gesetzt==false){
+            if(schwacher_finger_falls_kein_starker_gefunden==false){
+                //richtiger finger ist der linke
+            }
+            else{
+                //der rechte finger
+            }
+        }
     */
 
 
