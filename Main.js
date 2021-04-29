@@ -34,6 +34,9 @@ let fingerpositions = [
     ['B', 'C', 'C#', 'D', 'D#', 'E', 'F']
 ];
 
+let fingerposition_sequence = [];
+let temp_scoring = [];
+let index_scoring_desc = [];
 
 /* 
 //füllt notes_octaves mit allen Noten
@@ -129,7 +132,7 @@ if (Handrange_custom_mode) {
 
 
 //fügt zu den Noten der fingerpositions noch (alle) Oktaven hinzu 
-while (counter <= fingerpositions.length) {
+while (counter < fingerpositions.length) {
 
     length = fingerpositions[counter].length;
 
@@ -179,45 +182,42 @@ while (vn_ar.length - l > 0) {
     }
 
     //sequence speichert Scoring und der gespielten n Noten 
-    scoring_sequence.push(scoring);
-    scoring_notes_sequence.push(scoring_notes);
-
-    let Handposition_max_score = 0;
-    let Handposition_max = [];
-
-    //Bestimmt optimale Handposition für die nächsten n Noten 
-    // In bearbeitung
-    for (let k = l; k < stop; k++) {
-
-        // Nehme Handposition mit höchstem Scoring 
-        for (let v = 0; v < scoring_notes_sequence.length; v++) {
-
-            if (scoring_notes_sequence[v].includes(vn_ar[l]) && scoring_notes_sequence[v].length > Handposition_max_score) {
-
-                Handposition_max_score = scoring_notes_sequence[v].length;
-                Handposition_max = scoring_notes_sequence[v];
-
-            }
-        }
-
-        /*
-        Falls nächste Note nicht mehr mit der Akutellen Handposition spielbar ist und 
-        mehrere Handpositionen gleichen Score haben, wechsel zur Handposition mit der 
-        kleinsten Distanz zur letzten Handposition
-        */
-        /*      
-        for (let p = k; p < stop; p++) {
-            
-            if(!Handposition_max.includes(vn_ar[p])){
-            
-            }
-            
-        } */
-
-
+    scoring_sequence.push(scoring); 
+    scoring_notes_sequence.push(scoring_notes);  
+    
+    temp_scoring = scoring.slice();
+    // push indexe mit dem Höchstem Scoring in temp_scoring Array
+    // um darunterliegende Funktion realisieren zu können
+    for (let i = 0; i < temp_scoring.length; i++) {
+        
+        index_scoring_desc[i] = temp_scoring.indexOf(Math.max.apply(Math, temp_scoring));
+        temp_scoring[temp_scoring.indexOf(Math.max.apply(Math, temp_scoring))] = 0;
+        
     }
 
 
+    // Bestimmt optimale Handposition für die nächsten n Noten 
+    // Schaue ob die nächste note mit der Handposition (mit dem max. scoring) zu spielen ist, falls nicht dann wechsel zur nächsten
+    // Handposition dessen Scoring minimal kleiner als die max scoring Handposition  
+    // je mehr Noten eine Handposition spielen kann desto höher ist die wsk. das eine Note aus den nächsten n noten mit dieser Handposition gespielt werden kann
+    let index_scoring_desc_i = 0
+    for (let k = l; k < stop; k++) {
+   
+        if(scoring_notes[index_scoring_desc[index_scoring_desc_i]].includes(vn_ar[k])) {
+            
+            fingerposition_sequence.push(index_scoring_desc[index_scoring_desc_i]);
+                        
+        } else {
+                
+            index_scoring_desc_i++;
+            k--;
+        
+        }
+       
+    }     
+        
+
+ 
     //fingerpositions alg.
     /*
     Todo: 
@@ -225,8 +225,10 @@ while (vn_ar.length - l > 0) {
                   welcher wird gewählt bei gleicher distanz?  
         Lösung: Man betrachtet die nächsten x (hier 5) noten und ob und welcher finger als nächstes nochmal benötigt wird.
                 Dann verwendet man zum spielen dieser note den anderen.
+        
         let notenposition_in_positions=0;
         let zu_überprüfende_note= scoring_notes_sequence[(position der zu überprüfenden note)];
+            
             //man muss benachbarte noten in fingerpositions finden.
             for (let i = 0; i < 6; i++) {
                 if((verwendete fingerpositions)[i]==zu_überprüfende_note){
@@ -267,29 +269,31 @@ while (vn_ar.length - l > 0) {
             let richtiger_finger=false;//(boolean variable, links = false)
             let richtiger_finger_wurde_gesetzt;(//boolean)
             let schwacher_finger_falls_kein_starker_gefunden=false;//(boolean variable, links = false)
-        for (let v = 5; v >= 1; v--) //läuft rückwärts da nächste note am wichtigsten, man überschreibt immer falls wichtigere position.
-        {
+        
+            //läuft rückwärts da nächste note am wichtigsten, man überschreibt immer falls wichtigere position.
+            for (let v = 5; v >= 1; v--) {
             
-            if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_links){
-                //richtiger finger ist der rechtere
-               richtiger_finger=true;
-               richtiger_finger_wurde_gesetzt=true;
-            }
-            if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_rechts){
-                //richtiger finger ist der linkere
-                richtiger_finger=false;
+                if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_links){
+                    //richtiger finger ist der rechtere
+                richtiger_finger=true;
                 richtiger_finger_wurde_gesetzt=true;
-            }
-            if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_links_schwach){
-                schwacher_finger_falls_kein_starker_gefunden=true;
-            }
-            if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_rechts_schwach){
-                schwacher_finger_falls_kein_starker_gefunden=false;
-            }
+                }
+                if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_rechts){
+                    //richtiger finger ist der linkere
+                    richtiger_finger=false;
+                    richtiger_finger_wurde_gesetzt=true;
+                }
+                if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_links_schwach){
+                    schwacher_finger_falls_kein_starker_gefunden=true;
+                }
+                if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_rechts_schwach){
+                    schwacher_finger_falls_kein_starker_gefunden=false;
+                }
 
-        }
-        if(richtiger_finger_wurde_gesetzt==false){
-            if(schwacher_finger_falls_kein_starker_gefunden==false){
+            }
+        
+            if(richtiger_finger_wurde_gesetzt==false){
+                if(schwacher_finger_falls_kein_starker_gefunden==false){
                 //richtiger finger ist der linke
             }
             else{
