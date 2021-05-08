@@ -448,3 +448,15 @@ while (vn_ar.length - l > 0) {
 
 
 }
+
+
+const fs = require('fs');
+const jsonContent = JSON.stringify(fingerposition_sequence);
+
+fs.writeFile("./fingerposition_sequence.json", jsonContent, 'utf8', function (err) {
+    if (err) {
+        return console.log(err);
+    }
+
+    console.log("The file was saved!");
+}); 
