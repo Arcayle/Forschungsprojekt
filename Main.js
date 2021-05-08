@@ -224,137 +224,214 @@ while (vn_ar.length - l > 0) {
 
         // Note ist mit der Akutellen Fingerposition spielbar
         if (fingerposition.includes(vn_ar[k])) {
-            handposition_sequence[k].push(fingerposition.indexOf(vn_ar[k]));
+            handposition_sequence[k].push(fingerposition.indexOf(vn_ar[k])+1);
             fingerposition_sequence.push(handposition_sequence[k]);
             
-        }
-
-        // Hand ist bereits in Range um Note zu spielen, nur noch Finger richtig wechseln 
         // Falls nicht herausfinden welcher Finger die kürzeste Distanz zur nächsten Note hat
-        else {
-
+        // Hand ist bereits in Range um Note zu spielen, nur noch Finger richtig wechseln 
+        } else {
+                
             //Distance Algorithmus
             for (let u = 0; u < Handposition[handposition_sequence[k][0]].length; u++) {
 
                 // fingerposition_distance = [note, distanz zur nächst gespielten note]
                 // fingerposition_distance.push(Handposition note, note Index - nächste gespielte Note Index )
                 // Beispiel : Distanz von E4 und A#4 ist 6 => fingerposition_distance[i] = [ "E4", 6,]
-                fingerposition_distance.push(new Array  (   Handposition[handposition_sequence[k][0]][u],
-                                                            Math.abs(   Handposition[handposition_sequence[k][0]].indexOf(Handposition[handposition_sequence[k][0]][u]) -
-                                                                        Handposition[handposition_sequence[k][0]].indexOf(vn_ar[k])
-                                                                    ),
-                                                            vn_ar[k]
-                                                        ) 
-                                            );
+                fingerposition_distance.push(new Array(Handposition[handposition_sequence[k][0]][u],
+                    Math.abs(Handposition[handposition_sequence[k][0]].indexOf(Handposition[handposition_sequence[k][0]][u]) -
+                        Handposition[handposition_sequence[k][0]].indexOf(vn_ar[k])
+                    ),
+                    vn_ar[k]
+                )
+                );
 
 
             }
             
-            //Wähle Finger aus Distance Alg. der die minimale distanz hat und 
+            // note k ist eine schwarze Taste
+            //letzte Note mit Finger LN? => spiele note k mit RN
+            //letzte Note mit Finger RN? => spiele note k mit LN
+            //   weder noch => note k+1 näher an RN als LN? spiele note k mit LN
+            //              => note k+1 näher an LN als RN? spiele note k mit RN
             
+            let nachbarn = [];
+            for (let i = 0; i < fingerposition_distance.length; i++) {
+
+                if (fingerposition_distance[i][1] == 1) {
+                    nachbarn.push(fingerposition_distance[i][0]);
+                }
+
+            }
+
+             //note k+1 distanz zu RN kleiner als LN? spiele note k mit LN
+            if( Math.abs(notes_octaves.indexOf(vn_ar[k+1]) - notes_octaves.indexOf(nachbarn[1])) <
+             Math.abs(notes_octaves.indexOf(vn_ar[k+1]) - notes_octaves.indexOf(nachbarn[0])) ){
+                 
+                handposition_sequence[k].push(fingerposition.indexOf(nachbarn[0])+1);
+                fingerposition_sequence.push(handposition_sequence[k]);    
+         
+             // note k+1 distanz zu LN kleiner als RN? spiele note k mit RN
+            } else {
+             
+                handposition_sequence[k].push(fingerposition.indexOf(nachbarn[1])+1);
+                fingerposition_sequence.push(handposition_sequence[k]);
+
+            }
+
+ 
 
 
+            /*
+            let Handposition_in_use = Handposition[handposition_sequence[k][0]];
+            let notenposition_in_positions = 0;
+            let mögliche_nachbar_noten_links = '';
+            let mögliche_nachbar_noten_links_schwach = '';
+            let mögliche_nachbar_noten_rechts = '';
+            let mögliche_nachbar_noten_rechts_schwach = '';
+
+            for (let i = 0; i < Handposition_in_use.length; i++) {
+                if (Handposition_in_use[i] == vn_ar[k]) {
+                    notenposition_in_positions = i;
+                }
+            }
+
+
+            if (notenposition_in_positions - 1 < 0) {
+                notenposition_in_positions += 7;
+                mögliche_nachbar_noten_links = Handposition_in_use[notenposition_in_positions - 1];
+            }
+            else {
+                mögliche_nachbar_noten_links = Handposition_in_use[notenposition_in_positions - 1];
+            }
+
+            if (notenposition_in_positions - 2 < 0) {
+                notenposition_in_positions += 7;
+                mögliche_nachbar_noten_links_schwach = Handposition_in_use[notenposition_in_positions - 2];
+            }
+            else {
+                mögliche_nachbar_noten_links_schwach = Handposition_in_use[notenposition_in_positions - 2];
+            }
+
+            if (notenposition_in_positions + 1 > 6) {
+                notenposition_in_positions -= 7;
+                mögliche_nachbar_noten_rechts = Handposition_in_use[notenposition_in_positions + 1];
+            }
+            else {
+                mögliche_nachbar_noten_rechts = Handposition_in_use[notenposition_in_positions + 1];
+            }
+
+            if (notenposition_in_positions + 2 > 6) {
+                notenposition_in_positions += 7;
+                mögliche_nachbar_noten_rechts_schwach = Handposition_in_use[notenposition_in_positions + 2];
+            }
+            else {
+                mögliche_nachbar_noten_rechts_schwach = Handposition_in_use[notenposition_in_positions + 2];
+            }
+
+            let richtiger_finger = false;//(boolean variable, links = false)
+            let richtiger_finger_wurde_gesetzt;//boolean)
+            let schwacher_finger_falls_kein_starker_gefunden = false;//(boolean variable, links = false)
+
+
+
+            //läuft rückwärts da nächste note am wichtigsten, man überschreibt immer falls wichtigere position.
+
+            if (vn_ar[k + 1] == mögliche_nachbar_noten_links) {
+                //richtiger finger ist der rechtere
+                // von oben nach unten ( von links nach rechts)
+                let nachbarn = [];
+                for (let i = 0; i < fingerposition_distance.length; i++) {
+
+                    fingerposition_distance[i][1]
+                    if (fingerposition_distance[i][1] == 1) {
+                        nachbarn.push(fingerposition_distance[i][1]);
+                    }
+
+                }
+                // der rechte Nachbar
+                fingerposition[fingerposition.indexOf(nachbarn[1])] = vn_ar[k];
+                fingerposition_sequence.push(handposition_sequence[k].push(fingerposition.indexOf(vn_ar[k])));
+
+
+                richtiger_finger = true;
+                richtiger_finger_wurde_gesetzt = true;
+
+            }
+
+            if (vn_ar[k + 1] == mögliche_nachbar_noten_rechts) {
+                //richtiger finger ist der linkere
+                // von oben nach unten ( von links nach rechts)
+                let nachbarn = [];
+                for (let i = 0; i < fingerposition_distance.length; i++) {
+
+                    fingerposition_distance[i][1]
+                    if (fingerposition_distance[i][1] == 1) {
+                        nachbarn.push(fingerposition_distance[i][1]);
+                    }
+
+                }
+                // der rechte Nachbar
+                fingerposition[fingerposition.indexOf(nachbarn[0])] = vn_ar[k];
+                fingerposition_sequence.push(handposition_sequence[k].push(fingerposition.indexOf(vn_ar[k])));
+
+
+
+
+                richtiger_finger = false;
+                richtiger_finger_wurde_gesetzt = true;
+            }
+
+            if (vn_ar[k + 1] == mögliche_nachbar_noten_links_schwach) {
+                schwacher_finger_falls_kein_starker_gefunden = true;
+            }
+
+            if (vn_ar[k + 1] == mögliche_nachbar_noten_rechts_schwach) {
+                schwacher_finger_falls_kein_starker_gefunden = false;
+            }
+
+
+            if (richtiger_finger_wurde_gesetzt == false) {
+                if (schwacher_finger_falls_kein_starker_gefunden == false) {
+                    //richtiger finger ist der linke
+                    // von oben nach unten ( von links nach rechts)
+                    let nachbarn = [];
+                    for (let i = 0; i < fingerposition_distance.length; i++) {
+
+                        fingerposition_distance[i][1]
+                        if (fingerposition_distance[i][1] == 1) {
+                            nachbarn.push(fingerposition_distance[i][1]);
+                        }
+
+                    }
+                    // der rechte Nachbar
+                    fingerposition[fingerposition.indexOf(nachbarn[0])] = vn_ar[k];
+                    fingerposition_sequence.push(handposition_sequence[k].push(fingerposition.indexOf(vn_ar[k])));
+
+                } else {
+                    //der rechte Nachbar
+                    // von oben nach unten ( von links nach rechts)
+                    let nachbarn = [];
+                    for (let i = 0; i < fingerposition_distance.length; i++) {
+
+                        fingerposition_distance[i][1]
+                        if (fingerposition_distance[i][1] == 1) {
+                            nachbarn.push(fingerposition_distance[i][1]);
+                        }
+
+                    }
+                    // der rechte Nachbar
+                    fingerposition[fingerposition.indexOf(nachbarn[1])] = vn_ar[k];
+                    fingerposition_sequence.push(handposition_sequence[k].push(fingerposition.indexOf(vn_ar[k])));
+                }
+            }
+            */
+
+
+            fingerposition_distance = [];
 
         }
-        fingerposition_distance = [];
-
-
 
     }
-
-
-    /*
-    Todo: 
-        Problem : nächster Finger wird mit kleinster Fingerdistanz zur Note gewählt, aber
-                  welcher wird gewählt bei gleicher distanz?  
-        Lösung: Man betrachtet die nächsten x (hier 5) noten und ob und welcher finger als nächstes nochmal benötigt wird.
-                Dann verwendet man zum spielen dieser note den anderen.
-        
-        // zu_überprüfende_note = vn_ar[]
-        let notenposition_in_positions=0;
-        let zu_überprüfende_note= scoring_notes_sequence[(position der zu überprüfenden note)];
-            
-            // Linker und rechter Nachbar, haben distanz 1
-            //man muss benachbarte noten in Handposition finden.
-            for (let i = 0; i < 6; i++) {
-                if((verwendete Handposition)[i]==zu_überprüfende_note){
-                    notenposition_in_positions=i;
-                }
-            }
-            
-            //Schwacher Nachbar hat distanz 2 
-            //Da es auch sein kann, dass man den anderen finger zum spielen einer #note braucht wird es als schwaches nachbar scoring verwendet falls 
-            //in mögliche_nachbar_noten_links und mögliche_nachbar_noten_rechts
-            // nichts vorkommt.
-            if(i-1<0){
-                i+=7;
-                let mögliche_nachbar_noten_links= (verwendete Handposition)[i-1];}
-            else{
-                let mögliche_nachbar_noten_links= (verwendete Handposition)[i-1];}
-            }
-            if(i-2<0){
-                i+=7;
-                let mögliche_nachbar_noten_links_schwach= (verwendete Handposition)[i-2];}
-            else{
-                let mögliche_nachbar_noten_links_schwach= (verwendete Handposition)[i-2];}
-            }
-            if(i+1>6){
-                i-=7;
-                let mögliche_nachbar_noten_rechts= (verwendete Handposition)[i+1];}
-            else{
-                let mögliche_nachbar_noten_rechts= (verwendete Handposition)[i+1];}
-            }
-            if(i+2>6){
-                i+=7;
-                let mögliche_nachbar_noten_rechts_schwach= (verwendete Handposition)[i+2];}
-            else{
-                let mögliche_nachbar_noten_rechts_schwach= (verwendete Handposition)[i+2];}
-            }
-    
-            
-      
-            
-            //überprüfen ob in den nächsten noten eine der nachbar möglichkeiten vorkommt.
-            let richtiger_finger=false;//(boolean variable, links = false)
-            let richtiger_finger_wurde_gesetzt;(//boolean)
-            let schwacher_finger_falls_kein_starker_gefunden=false;//(boolean variable, links = false)
-        
-            //läuft rückwärts da nächste note am wichtigsten, man überschreibt immer falls wichtigere position.
-            // for nur 1 mal ausführen 
-            
-            
-                if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_links){
-                    //richtiger finger ist der rechtere
-                richtiger_finger=true;
-                richtiger_finger_wurde_gesetzt=true;
-                }
-                if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_rechts){
-                    //richtiger finger ist der linkere
-                    richtiger_finger=false;
-                    richtiger_finger_wurde_gesetzt=true;
-                }
-                if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_links_schwach){
-                    schwacher_finger_falls_kein_starker_gefunden=true;
-                }
-                if(scoring_notes_sequence[(position der zu überprüfenden note) + v]==mögliche_nachbar_noten_rechts_schwach){
-                    schwacher_finger_falls_kein_starker_gefunden=false;
-                }
-
-        
-            if(richtiger_finger_wurde_gesetzt==false){
-                if(schwacher_finger_falls_kein_starker_gefunden==false){
-                //richtiger finger ist der linke
-            }
-            else{
-                //der rechte finger
-            }
-        }
-    */
-
-
-
-
-
 
 
 
@@ -362,16 +439,12 @@ while (vn_ar.length - l > 0) {
     stop = (l + n);
     scoring = [];
     scoring_notes = [];
-    for (let i = 0; i < Handposition_counter+1; i++) {
+    for (let i = 0; i < Handposition_counter + 1; i++) {
         scoring.push(0);
         scoring_notes.push(new Array());
 
     }
 
+
+
 }
-
-
-
-
-
-
