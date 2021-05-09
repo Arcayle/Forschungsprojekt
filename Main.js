@@ -1,4 +1,4 @@
-let JSON_input = require('D:/google drive/10. Semester SS21/Projekt-INF/Piano/Code/Invention_4_by_J_S_Bach_BWV_775_for_Piano_with_fingering.mid.json');
+let JSON_input = require('D:/google drive/10. Semester SS21/Projekt-INF/Piano/covertToJson/input/Ground Truths/Greensleeves_Piano_Debutant/Greensleeves_Piano_Debutant.mid.json');
 let vn_ar = [];
 let notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 let octave = ['0', '1', '2', '3', '4', '5', '6', '7'];
@@ -221,16 +221,17 @@ while (vn_ar.length - l > 0) {
 
         }
         fingerposition_counter = 0;
-
+        
         // Note ist mit der Akutellen Fingerposition spielbar
         if (fingerposition.includes(vn_ar[k])) {
-            handposition_sequence[k].push(fingerposition.indexOf(vn_ar[k])+1);
+            handposition_sequence[k].push(fingerposition.indexOf(vn_ar[k]) + 1);
+            handposition_sequence[k].push(fingerposition);
             fingerposition_sequence.push(handposition_sequence[k]);
-            
-        // Falls nicht herausfinden welcher Finger die kürzeste Distanz zur nächsten Note hat
-        // Hand ist bereits in Range um Note zu spielen, nur noch Finger richtig wechseln 
+
+            // Falls nicht herausfinden welcher Finger die kürzeste Distanz zur nächsten Note hat
+            // Hand ist bereits in Range um Note zu spielen, nur noch Finger richtig wechseln 
         } else {
-                
+
             //Distance Algorithmus
             for (let u = 0; u < Handposition[handposition_sequence[k][0]].length; u++) {
 
@@ -247,13 +248,13 @@ while (vn_ar.length - l > 0) {
 
 
             }
-            
-            // note k ist eine schwarze Taste
+
+            // Ziel: minimale Handpositionswechsel
             //letzte Note mit Finger LN? => spiele note k mit RN
             //letzte Note mit Finger RN? => spiele note k mit LN
             //   weder noch => note k+1 näher an RN als LN? spiele note k mit LN
             //              => note k+1 näher an LN als RN? spiele note k mit RN
-            
+
             let nachbarn = [];
             for (let i = 0; i < fingerposition_distance.length; i++) {
 
@@ -263,22 +264,24 @@ while (vn_ar.length - l > 0) {
 
             }
 
-             //note k+1 distanz zu RN kleiner als LN? spiele note k mit LN
-            if( Math.abs(notes_octaves.indexOf(vn_ar[k+1]) - notes_octaves.indexOf(nachbarn[1])) <
-             Math.abs(notes_octaves.indexOf(vn_ar[k+1]) - notes_octaves.indexOf(nachbarn[0])) ){
-                 
-                handposition_sequence[k].push(fingerposition.indexOf(nachbarn[0])+1);
-                fingerposition_sequence.push(handposition_sequence[k]);    
-         
-             // note k+1 distanz zu LN kleiner als RN? spiele note k mit RN
+            //note k+1 distanz zu RN kleiner als LN? spiele note k mit LN
+            if (Math.abs(notes_octaves.indexOf(vn_ar[k + 1]) - notes_octaves.indexOf(nachbarn[1])) <
+                Math.abs(notes_octaves.indexOf(vn_ar[k + 1]) - notes_octaves.indexOf(nachbarn[0]))) {
+
+                handposition_sequence[k].push(fingerposition.indexOf(nachbarn[0]) + 1);
+                handposition_sequence[k].push(fingerposition);
+                fingerposition_sequence.push(handposition_sequence[k]);
+
+                // note k+1 distanz zu LN kleiner als RN? spiele note k mit RN
             } else {
-             
-                handposition_sequence[k].push(fingerposition.indexOf(nachbarn[1])+1);
+
+                handposition_sequence[k].push(fingerposition.indexOf(nachbarn[1]) + 1);
+                handposition_sequence[k].push(fingerposition);
                 fingerposition_sequence.push(handposition_sequence[k]);
 
             }
 
- 
+
 
 
             /*
@@ -431,6 +434,8 @@ while (vn_ar.length - l > 0) {
 
         }
 
+        fingerposition = [];
+       
     }
 
 
@@ -449,9 +454,16 @@ while (vn_ar.length - l > 0) {
 
 }
 
+let ar_temp = [];
+for (let i = 0; i < fingerposition_sequence.length; i++) {
+
+    ar_temp.push(fingerposition_sequence[i][2]);
+
+}
 
 const fs = require('fs');
-const jsonContent = JSON.stringify(fingerposition_sequence);
+const jsonContent = JSON.stringify(ar_temp);
+//const jsonContent = JSON.stringify(fingerposition_sequence);
 
 fs.writeFile("./fingerposition_sequence.json", jsonContent, 'utf8', function (err) {
     if (err) {
@@ -459,4 +471,4 @@ fs.writeFile("./fingerposition_sequence.json", jsonContent, 'utf8', function (er
     }
 
     console.log("The file was saved!");
-}); 
+});
